@@ -10,5 +10,5 @@ Key Objectives:
 Team: 
 * Pranav Gupta
 * Lee Kwun Yin Dickson
-* Supervised by Prof. Ross Murch
+* Supervised by Prof. Ross Murch and Dr. Amartansh Dubey
 
