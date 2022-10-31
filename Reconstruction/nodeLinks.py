@@ -26,6 +26,10 @@ def generateGrid(delta=6.25,nodeFile='defineNodes.json',corners=0):
     # axisY = np.linspace(minY, maxY, num=int(height/delta)+(height%delta>0), endpoint=True)
     # gridX, gridY = np.meshgrid(axisX, axisY)
     if (corners==1):
+        minX = int(minX/delta)+(minX%delta>0)
+        maxX = int(maxX/delta)+(maxX%delta>0)
+        minY = int(minY/delta)+(minY%delta>0)
+        maxY = int(maxY/delta)+(maxY%delta>0)
         return grid, minX, maxX, minY, maxY
     return grid
 
@@ -36,14 +40,13 @@ def generateWeights(thisGrid, pointA, pointB):
     x2, y2 = pointB
     # Edge Cases
     if (x2==x1):
-        thisGrid[x1,:] = 1
+        thisGrid[x1-1,:] = 1
         return thisGrid
     if (x2<x1 and y2<y1):
         x1, x2 = x2, x1
         y1, y2 = y2, y1
     # distance for weight
     w = 1/np.sqrt((x2-x1)**2+(y2-y1)**2)
-    # print(w)
     # Line Drawing Conditions
     slope = (y2-y1)/(x2-x1)
     ax, ay = x1, y1
@@ -62,11 +65,11 @@ def generateWeights(thisGrid, pointA, pointB):
     dx = bx-ax
     dy = abs(by-ay)
     p = 2*dy-dx
-    y = ay
+    y = ay-1
     # x = ax + step
 
     # *** Set weights as 1/sqrt(d) instead of just 1 ***
-    for step in range(dx+1):
+    for step in range(dx):
         # decision parameter
         if (p>0):
             # y = Yk + 1
@@ -81,53 +84,71 @@ def generateWeights(thisGrid, pointA, pointB):
         # Update 
         if (slope<0):
             if (abs(slope)>1):
-                thisGrid[y, bx-step] = 1
+                thisGrid[y, bx-step-1] = 1
             else:
-                thisGrid[bx-step, y] = 1
+                thisGrid[bx-step-1, y] = 1
         else:
             if (abs(slope)>1):
                 thisGrid[y, ax+step] = 1
             else:
                 thisGrid[ax+step, y] = 1
-        # print(ax+step, y)
+
     return thisGrid
 
 # Save the Weight Matrices into JSON Dictionary
-def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json', weightsFile='defineWeights.json'):
+def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json', weightsFile='defineWeights.json', delta=6.25):
     # Grid Template
     grid, minX, maxX, minY, maxY = generateGrid(corners=1)
     nodes = json.load(open(nodeFile))
     links = {}
     weights = {}
-    for node in nodes:
+    for thisNode in nodes['nodeList']:
         # Identify possible links
         possibleLinks = []
-        for otherNode in nodes:
+        for checkNode in nodes['nodeList']:
+            # Avoid interference with original list
+            node = [thisNode[0], thisNode[1]]
+            otherNode = [checkNode[0], checkNode[1]]
+            # Conversion to Grid
+            node[0] = int(node[0]/delta)+(node[0]%delta>0)
+            node[1] = int(node[1]/delta)+(node[1]%delta>0)
+            otherNode[0] = int(otherNode[0]/delta)+(otherNode[0]%delta>0)
+            otherNode[1] = int(otherNode[1]/delta)+(otherNode[1]%delta>0)
             # Edge Cases
             if (node[0]==otherNode[0]):
-                if (node[0]==maxX or node[0]==minX):
+                if (node[1]==maxY or node[1]==minY):
+                    # Same Edge
+                    continue
+                elif (node[1]==otherNode[1]): 
+                    # Same Node
                     continue
                 else:
                     possibleLinks.append(otherNode)
             if (node[1]==otherNode[1]):
-                if (node[1]==maxY or node[1]==minY):
+                if (node[0]==maxX or node[0]==minX):
+                    # Same Edge
                     continue
                 else:
                     possibleLinks.append(otherNode)
             possibleLinks.append(otherNode)
             # Generate Weights for this Link
-            thisGrid = generateWeights(np.zeros_like(grid), node, otherNode)
+            weight = generateWeights(np.zeros_like(grid), node, otherNode)
             # Save this Matrix to weights
-            weights[tuple(node.extend(otherNode))] = thisGrid
-
+            weights[str(node+otherNode)] = weight.tolist()
+        
         # Save the possible links to Links Dictionary
-        links[tuple(node)] = possibleLinks
+        links[str(node)] = possibleLinks
 
     # Save Links to JSON File for reference
     with open(linksFile, 'w') as output:
         output.write(json.dumps(links, indent=4))
-    # Save Weights to JSON File
+    # Save Weights to JSON File for reference
     with open(weightsFile, 'w') as output:
         output.write(json.dumps(weights, indent=4))
 
- 
+    return 1
+
+##############################################################
+# To Test: 
+# generateAllWeights()
+
