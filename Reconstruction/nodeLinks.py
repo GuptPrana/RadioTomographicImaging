@@ -31,7 +31,9 @@ def generateGrid(delta=6.25,nodeFile='defineNodes.json',corners=0):
 
 # Use Bresenham's Line Algorithm to Generate Coordinates in Line of Sight
 # Assume No Scattering
-def generateWeights(thisGrid, x1, y1, x2, y2):
+def generateWeights(thisGrid, pointA, pointB):
+    x1, y1 = pointA
+    x2, y2 = pointB
     # Edge Cases
     if (x2==x1):
         thisGrid[x1,:] = 1
@@ -63,7 +65,7 @@ def generateWeights(thisGrid, x1, y1, x2, y2):
     y = ay
     # x = ax + step
 
-# Should the weight be =1 or =1/sqrt(d)
+    # *** Set weights as 1/sqrt(d) instead of just 1 ***
     for step in range(dx+1):
         # decision parameter
         if (p>0):
@@ -90,31 +92,42 @@ def generateWeights(thisGrid, x1, y1, x2, y2):
         # print(ax+step, y)
     return thisGrid
 
-'''
 # Save the Weight Matrices into JSON Dictionary
-def generateAllWeights(numLinks=0, nodeFile='defineNodes.json'):
+def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json', weightsFile='defineWeights.json'):
     # Grid Template
     grid, minX, maxX, minY, maxY = generateGrid(corners=1)
     nodes = json.load(open(nodeFile))
-    
+    links = {}
+    weights = {}
     for node in nodes:
+        # Identify possible links
         possibleLinks = []
-        xRow, yRow = 0, 0
-        if (node[0]==maxX):
-            xRow = 1
-        if (node[1]==maxY):
-            yRow = 1
-        
-    if node[0]==thisNode[0]:
-        pass
-    elif node[1]==thisNode[1]:
-        pass
+        for otherNode in nodes:
+            # Edge Cases
+            if (node[0]==otherNode[0]):
+                if (node[0]==maxX or node[0]==minX):
+                    continue
+                else:
+                    possibleLinks.append(otherNode)
+            if (node[1]==otherNode[1]):
+                if (node[1]==maxY or node[1]==minY):
+                    continue
+                else:
+                    possibleLinks.append(otherNode)
+            possibleLinks.append(otherNode)
+            # Generate Weights for this Link
+            thisGrid = generateWeights(np.zeros_like(grid), node, otherNode)
+            # Save this Matrix to weights
+            weights[tuple(node.extend(otherNode))] = thisGrid
 
-    for link in range(numLinks):
-        thisGrid = np.zeros_like(grid)
-        thisGrid = generateWeights(np.zeros_like(grid), )
-'''
+        # Save the possible links to Links Dictionary
+        links[tuple(node)] = possibleLinks
 
-
+    # Save Links to JSON File for reference
+    with open(linksFile, 'w') as output:
+        output.write(json.dumps(links, indent=4))
+    # Save Weights to JSON File
+    with open(weightsFile, 'w') as output:
+        output.write(json.dumps(weights, indent=4))
 
  
