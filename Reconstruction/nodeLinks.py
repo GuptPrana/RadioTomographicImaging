@@ -114,23 +114,31 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
             node[1] = int(node[1]/delta)+(node[1]%delta>0)
             otherNode[0] = int(otherNode[0]/delta)+(otherNode[0]%delta>0)
             otherNode[1] = int(otherNode[1]/delta)+(otherNode[1]%delta>0)
+            # print(otherNode)
             # Edge Cases
             if (node[0]==otherNode[0]):
-                if (node[1]==maxY or node[1]==minY):
+                if (node[0]==maxY or node[0]==minY):
                     # Same Edge
                     continue
                 elif (node[1]==otherNode[1]): 
                     # Same Node
                     continue
                 else:
-                    possibleLinks.append(otherNode)
-            if (node[1]==otherNode[1]):
-                if (node[0]==maxX or node[0]==minX):
+                    if (otherNode not in possibleLinks):
+                        possibleLinks.append(otherNode)
+                    else: 
+                        continue
+            elif (node[1]==otherNode[1]):
+                if (node[1]==maxX or node[1]==minX):
                     # Same Edge
                     continue
                 else:
-                    possibleLinks.append(otherNode)
-            possibleLinks.append(otherNode)
+                    if (otherNode not in possibleLinks):
+                        possibleLinks.append(otherNode)
+                    else: 
+                        continue
+            elif (otherNode not in possibleLinks):
+                possibleLinks.append(otherNode)
             # Generate Weights for this Link
             weight = generateWeights(np.zeros_like(grid), node, otherNode)
             # Save this Matrix to weights
