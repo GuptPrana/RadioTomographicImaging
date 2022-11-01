@@ -140,6 +140,7 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
             elif (otherNode not in possibleLinks):
                 possibleLinks.append(otherNode)
             # Generate Weights for this Link
+            # Can use pointer/reference to avoid sending grid in every function call
             weight = generateWeights(np.zeros_like(grid), node, otherNode)
             # Save this Matrix to weights
             weights[str(node+otherNode)] = weight.tolist()
