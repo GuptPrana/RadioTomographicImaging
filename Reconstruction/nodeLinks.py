@@ -101,7 +101,8 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
     grid, minX, maxX, minY, maxY = generateGrid(corners=1)
     nodes = json.load(open(nodeFile))
     links = {}
-    weights = {}
+    # possibleLinks = {}
+    linkCount = 0 
     for thisNode in nodes['nodeList']:
         # Identify possible links
         possibleLinks = []
@@ -114,7 +115,7 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
             node[1] = int(node[1]/delta)+(node[1]%delta>0)
             otherNode[0] = int(otherNode[0]/delta)+(otherNode[0]%delta>0)
             otherNode[1] = int(otherNode[1]/delta)+(otherNode[1]%delta>0)
-            # *** Can check if in possibleLinks first
+            
             # Edge Cases
             if (node[0]==otherNode[0]):
                 if (node[0]==maxY or node[0]==minY):
@@ -123,29 +124,37 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
                 elif (node[1]==otherNode[1]): 
                     # Same Node
                     continue
-                else:
-                    if (otherNode not in possibleLinks):
-                        possibleLinks.append(otherNode)
-                    else: 
-                        continue
             elif (node[1]==otherNode[1]):
                 if (node[1]==maxX or node[1]==minX):
                     # Same Edge
                     continue
-                else:
-                    if (otherNode not in possibleLinks):
-                        possibleLinks.append(otherNode)
-                    else: 
-                        continue
-            elif (otherNode not in possibleLinks):
+            elif (otherNode in possibleLinks):
+                continue
+            
+            if (str(otherNode) not in links):
                 possibleLinks.append(otherNode)
+            elif (node not in links[str(otherNode)]):
+                possibleLinks.append(otherNode)
+            else: 
+                continue
+
             # Generate Weights for this Link
-            # *** Can use pointer/reference to avoid sending grid in every function call
+            # Can use pointer/reference to avoid sending grid in every function call
             weight = generateWeights(np.zeros_like(grid), node, otherNode)
-            # Save this Matrix to weights
-            weights[str(node+otherNode)] = weight.tolist()
-        
+            # x*y array --> 1*xy array (concatenate all y|x for all x)
+            weightVector = weight.flatten()
+            # concatenate this weight array into the weightMatrix --> numLinks*xy array
+            if (linkCount == 0):
+                weightMatrix = weightVector
+            else:
+                weightMatrix = np.vstack((weightMatrix, weightVector))
+            
+            linkCount += 1
+            print(linkCount)
+            print(weightMatrix.shape)
+
         # Save the possible links to Links Dictionary
+        # Saving Links (incomplete) is not really useful though
         links[str(node)] = possibleLinks
 
     # Save Links to JSON File for reference
@@ -153,11 +162,10 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
         output.write(json.dumps(links, indent=4))
     # Save Weights to JSON File for reference
     with open(weightsFile, 'w') as output:
-        output.write(json.dumps(weights, indent=4))
+        output.write(json.dumps(weightMatrix.tolist(), indent=4))
 
     return 1
 
 ##############################################################
 # To Test: 
-# generateAllWeights()
-
+print(generateAllWeights())
