@@ -1,4 +1,7 @@
 # Reconstruction Algorithm
+
+* Singular Value Decomposition of Weight Matrices for Inverse Problem (i.e. x = y * W_inv) where y: RSSI values, x: reconstructed image pixel intensities
+
 ## File Description
 
 * nodeLinks.py generates the weight matrix for every link in the wireless network. Weights saved to defineWeights.json to avoid redundant computation. 
