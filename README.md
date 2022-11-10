@@ -6,7 +6,7 @@ Key Objectives:
 *	To experiment with hardware and software methods to speed up imaging 
 * To experiment with different hardware optimizations and machine learning algorithms to improve imaging accuracy.
 
-## Final Year Project for HKUST ECE UG
+## Final Year Project for ECE HKUST - Team MR02 (2023)
 Team: 
 * Pranav Gupta
 * Lee Kwun Yin Dickson
