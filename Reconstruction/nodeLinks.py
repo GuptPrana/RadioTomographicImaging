@@ -168,4 +168,4 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
 
 ##############################################################
 # To Test: 
-print(generateAllWeights())
+# print(generateAllWeights())
