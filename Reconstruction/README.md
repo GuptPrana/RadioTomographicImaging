@@ -9,3 +9,4 @@
 * imaging.py produces the images from the RSSI values and Weights.
 * defineNodes.json contains defined absolute positions of WiFi modules in CENTIMETERS. Current configuration: 20 Nodes 40cm apart in Square arrangement.
 
+To change weights from 1 to 1/d | d = distance between two nodes, simply set grid[i,y] =w instead of =1 in generateWeights
