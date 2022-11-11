@@ -19,8 +19,9 @@ def generateGrid(delta=6.25,nodeFile='defineNodes.json',corners=0):
         elif (node[1]<minY):
             minY = node[1]
 
-    height = int((maxY-minY)/delta)+((maxY-minY)%delta>0)
-    width = int((maxX-minX)/delta)+((maxX-minX)%delta>0)
+    # Key: 0 to 32 is 33 squares, NOT 32
+    height = int((maxY-minY)/delta)+((maxY-minY)%delta>0)+1
+    width = int((maxX-minX)/delta)+((maxX-minX)%delta>0)+1
     grid = np.zeros((width, height))
     # axisX = np.linspace(minX, maxX, num=int(width/delta)+(width%delta>0), endpoint=True)
     # axisY = np.linspace(minY, maxY, num=int(height/delta)+(height%delta>0), endpoint=True)
@@ -40,7 +41,7 @@ def generateWeights(thisGrid, pointA, pointB):
     x2, y2 = pointB
     # Edge Cases
     if (x2==x1):
-        thisGrid[x1-1,:] = 1
+        thisGrid[x1,:] = 1
         return thisGrid
     if (x2<x1 and y2<y1):
         x1, x2 = x2, x1
@@ -53,45 +54,39 @@ def generateWeights(thisGrid, pointA, pointB):
     bx, by = x2, y2
     if (slope<0):
         # Reverse
-        ax, ay = x2, y2
-        bx, by = x1, y1
+        ax, ay = x1, y2
+        bx, by = x2, y1
     if (abs(slope)>1):
         # Flip X and Y
         ax, ay = ay, ax
         bx, by = by, bx
-    # print(ax, ay, bx, by)
-    # print(slope)
     # Coordinate space
     dx = bx-ax
-    dy = abs(by-ay)
+    dy = by-ay
     p = 2*dy-dx
-    y = ay-1
+    y = 0
     # x = ax + step
-
     # *** Set weights as 1/sqrt(d) instead of just 1 ***
-    for step in range(dx):
+    for step in range(dx+1):
         # decision parameter
         if (p>0):
             # y = Yk + 1
             p += 2*dy-2*dx
-            if (slope<0):
-                y -= 1
-            else:
-                y += 1
+            y += 1 if (step>0) else 0
         else:
             # y = Yk
             p += 2*dy
         # Update 
         if (slope<0):
             if (abs(slope)>1):
-                thisGrid[y, bx-step-1] = 1
+                thisGrid[by-y, ax+step] = 1
             else:
-                thisGrid[bx-step-1, y] = 1
+                thisGrid[ax+step, by-y] = 1
         else:
             if (abs(slope)>1):
-                thisGrid[y, ax+step] = 1
+                thisGrid[ay+y, ax+step] = 1
             else:
-                thisGrid[ax+step, y] = 1
+                thisGrid[ax+step, ay+y] = 1
 
     return thisGrid
 
@@ -137,7 +132,8 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
                 possibleLinks.append(otherNode)
             else: 
                 continue
-
+            print(node)
+            print(otherNode)
             # Generate Weights for this Link
             # Can use pointer/reference to avoid sending grid in every function call
             weight = generateWeights(np.zeros_like(grid), node, otherNode)
@@ -150,8 +146,6 @@ def generateAllWeights(nodeFile='defineNodes.json', linksFile='defineLinks.json'
                 weightMatrix = np.vstack((weightMatrix, weightVector))
             
             linkCount += 1
-            print(linkCount)
-            print(weightMatrix.shape)
 
         # Save the possible links to Links Dictionary
         # Saving Links (incomplete) is not really useful though
