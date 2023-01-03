@@ -1,3 +1,4 @@
 ## Files
 * Project Proposal 
-* Monthly Report 1 (Oct)
+* Monthly Reports
+* Midterm Poster
