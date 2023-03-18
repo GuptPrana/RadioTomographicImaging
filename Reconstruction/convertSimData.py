@@ -43,8 +43,7 @@ def extractRSSI(filename='./rssiSim.csv'):
     for l in range(16, 20):
         i += 1
         rssiValues = np.concatenate((rssiValues, data[12-i:8-i:-1,l]))
-
-    print(*rssiValues, sep=', ')
+        
     return rssiValues
 
-# extractRSSI()
+extractRSSI()
