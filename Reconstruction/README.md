@@ -13,4 +13,4 @@
 * To change weights from 1 to 1/d | d = distance between two nodes, simply set grid[i,y] =w instead of =1 in generateWeights
 * 130 Links are generated instead of 190 (paper suggests k(k-1)/2 links | k: number of nodes)
 * Assumed No Scattering (only Line-Of-Sight)
-* Grid is (33, 33) - boundary squares (containing all the nodes) should be excluded so the image is (31, 31) 
+* Image Grid is (32, 32) - Weights are of shape (130, 1024)
