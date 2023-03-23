@@ -5,7 +5,7 @@ import reconstructors
 from convertSimData import extractRSSI
 from matplotlib import pyplot as plt
 
-def generateImage(weightsFile='defineWeightsEll.json', RSSI=[], resolution=32, lamb=0.01):
+def generateImage(weightsFile='defineWeightsEll.json', RSSI=[], resolution=32, lamb=0.1):
     weights = json.load(open(weightsFile))
     weights = np.array(weights)
     # print(weights.shape)
@@ -13,21 +13,15 @@ def generateImage(weightsFile='defineWeightsEll.json', RSSI=[], resolution=32, l
     # replace np.ones([130, 1]) with the RSSI values of same dimension
     rssi = np.array(RSSI) #np.ones(130)
     image = reconstructors.reconstructSVD(weights, rssi, lamb)
+    image_updated = reconstructors.reconstruct_updated(weights, rssi, resolution, lamb)
     image = np.split(image, resolution)
+    image_updated = np.split(image_updated, resolution)
+    plt.figure(1)
     plt.imshow(image)
+    plt.figure(2)
+    plt.imshow(image_updated)
     plt.show()
     return
     
-    '''
-    # The below is only for demo and can be removed
-    # Change i in weights[i] to see different lines
-    w = np.array(weights[-1])
-    w = np.split(w, resolution)
-    plt.imshow(w)
-    plt.show()
-    return
-    '''
-
 rssi = extractRSSI()
-# print(*rssiValues, sep=', ')
 generateImage(RSSI=rssi)
